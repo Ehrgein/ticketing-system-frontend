@@ -3,35 +3,67 @@ import React from "react";
 import api from "@/api";
 
 function TicketsNewPage() {
-  //   async function add(formData: FormData) {
-  //     "use server";
-
-  //     const message = formData.get("text") as string;
-  //     const url = await api.message.submit(message);
-
-  //     redirect(url);
-  //   }
+  const availableSeats = ["A1", "A2", "A3", "A4", "A5"];
 
   async function buyTicketaction(formData: FormData) {
     "use server";
 
-    const price = Number(formData.get("price"));
+    const user = "Juan Perez";
+    const purchaser_id = 14;
+
+    const event_id = 1;
+    const ticket_id = 25341;
+    const seat_location = "A1";
+    const price_per_ticket = Number(formData.get("price"));
     const quantity = Number(formData.get("quantity"));
+    const event_time_id = Number(formData.get("locationID"));
 
-    const data = { price, quantity };
+    const data = {
+      event_id,
+      event_time_id,
+      ticket_id,
+      purchaser_id,
+      seat_location,
+      price_per_ticket,
+      quantity,
+    };
 
-    const url_mercadopago = await api.message.submitMercadopago(data);
+    // Step 1: This line is the starter of the process. Creates a payment order for whatever the user has selected in the form. It returns a redirect to the URL Api where you make the purchase.
+    const url_mercadopago = await api.message.createPaymentRequest(data);
 
     redirect(url_mercadopago);
   }
 
   return (
     <div className="">
-      <h1 className="pb-4">Metallica</h1>
+      <h1 className="pb-4 font-medium text-lg">
+        Metallica - River Plate 25/02
+      </h1>
+      <p></p>
 
-      <form action={buyTicketaction} className="grid gap-2">
-        <label>450</label>
-        <input type="hidden" name="price" value={450} />
+      <form action={buyTicketaction} className="grid gap- space-y-4">
+        <label>Precio: $100</label>
+        <input type="hidden" name="price" value={100} />
+        <label>Ubicacion</label>
+        <select
+          name="locationID"
+          defaultValue={14}
+          className="text-black p-2 rounded-none"
+        >
+          <option value={14}>01/05/2025 - 14:00hs - Campo</option>
+          <option value={15}>01/05/2026 - 17:00hs - Campo</option>
+          <option value={16}>01/05/2027 - 23:00hs - Campo</option>
+        </select>
+
+        <label>Available Seats:</label>
+        <select className="text-black p-2" name="seat_location">
+          {availableSeats.map((seat) => (
+            <option key={seat} value={seat}>
+              {seat}
+            </option>
+          ))}
+        </select>
+
         <label className="">Quantity</label>
         <input
           className="border-2 border-blue-400 p-2 text-black"

@@ -6,15 +6,15 @@ import api from "@/api";
 export const dynamic = "force-static";
 
 export default async function HomePage() {
-  const messages = await api.message.list();
-
   async function add(formData: FormData) {
     "use server";
 
     const message = formData.get("text") as string;
-    const url = await api.message.submit(message);
 
-    redirect(url);
+    // This line creates a new "preference" (a request to make a payment for a ticket) in the MercadoPago API
+    // const url = await api.message.createPaymentRequest(message);
+
+    // redirect(url);
   }
 
   return (
@@ -30,13 +30,6 @@ export default async function HomePage() {
           Enviar
         </button>
       </form>
-      <ul className="grid gap-2">
-        {messages.map((message) => (
-          <li key={message.id} className="rounded bg-blue-400/10 p-4">
-            {message.text}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

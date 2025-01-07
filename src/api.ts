@@ -29,85 +29,42 @@ const api = {
       return JSON.parse(db.toString());
     },
 
-    async add({ id, xSignature, xRequestId }: VerifiedMessage): Promise<void> {
-      // Obtenemos los mensajes
-      // const db = await api.message.list();
-
-      const payment = await new Payment(mercadopago).get({ id: id });
-
-      console.log(payment, "this is the payment object. If the ");
-
-      // Si se aprueba, agregamos el mensaje
-      if (payment.status === "approved") {
-        // Obtenemos los datos
-
-        const validated = createManifest(id, xSignature, xRequestId);
-
-        console.log(validated);
-
-        // await api.message.add({ id: payment.id!, text: payment.metadata.text });
-
-        // Revalidamos la página de inicio para mostrar los datos actualizados
-        revalidatePath("/");
-      }
-
-      // Si ya existe un mensaje con ese id, lanzamos un error
-      // if (db.some((_message) => _message.id === message.id)) {
-      //   throw new Error("Message already added");
-      // }
-
-      // Agregamos el nuevo mensaje
-      // const draft = db.concat(message);
-
-      // Guardamos los datos
-      // writeFileSync("db/message.db", JSON.stringify(draft, null, 2));
-    },
-
-    async submit(text: Message["text"]) {
-      // Creamos la preferencia incluyendo el precio, titulo y metadata. La información de `items` es standard de Mercado Pago. La información que nosotros necesitamos para nuestra DB debería vivir en `metadata`.
-      const preference = await new Preference(mercadopago).create({
-        body: {
-          items: [
-            {
-              id: "message",
-              unit_price: 50,
-              quantity: 1,
-              title: "Mensaje de muro",
-            },
-          ],
-          metadata: {
-            text,
-          },
-        },
-      });
-
-      // Devolvemos el init point (url de pago) para que el usuario pueda pagar
-      return preference.init_point!;
-    },
-    async submitMercadopago({
-      price,
+    async createPaymentRequest({
+      event_time_id,
+      event_id,
+      ticket_id,
+      purchaser_id,
+      price_per_ticket,
+      seat_location,
       quantity,
     }: {
-      price: number;
+      event_time_id: number;
+      event_id: number;
+      ticket_id: number;
+      purchaser_id: number;
+      price_per_ticket: number;
+      seat_location: string;
       quantity: number;
     }) {
       // Creamos la preferencia incluyendo el precio, titulo y metadata. La información de `items` es standard de Mercado Pago. La información que nosotros necesitamos para nuestra DB debería vivir en `metadata`.
 
-      console.log("this is the quantity:", quantity);
-      console.log("this is the price", price);
-
       const preference = await new Preference(mercadopago).create({
         body: {
           items: [
             {
               id: "message",
-              unit_price: price,
+              unit_price: price_per_ticket,
               quantity: quantity,
-              title: "Mensaje de muro",
+              title: "Entrada Metallica",
             },
           ],
           metadata: {
-            price,
+            event_time_id,
+            event_id,
+            ticket_id,
+            purchaser_id,
+            price_per_ticket,
+            seat_location,
             quantity,
           },
         },
@@ -115,6 +72,45 @@ const api = {
 
       // Devolvemos el init point (url de pago) para que el usuario pueda pagar
       return preference.init_point!;
+    },
+
+    async sendPaymentData({
+      id,
+      xSignature,
+      xRequestId,
+    }: VerifiedMessage): Promise<void> {
+      const payment = await new Payment(mercadopago).get({ id: id });
+
+      // If approved, we need to validate it with the createManifest helper.
+      if (payment.status === "approved") {
+        // if validated, we can upload anything we want to our database.
+        const validated = createManifest(id, xSignature, xRequestId);
+
+        console.log(payment, "payment object");
+
+        if (validated) {
+          const response = await fetch("http://localhost:4000/api/tickets", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              // price: payment.metadata.price,
+              // quantity: payment.metadata.quantity,
+              event_time_id: payment.metadata.event_time_id,
+              event_id: payment.metadata.event_id,
+              ticket_id: payment.metadata.ticket_id,
+              purchaser_id: payment.metadata.purchaser_id,
+              price_per_ticket: payment.metadata.price_per_ticket,
+              seat_location: payment.metadata.seat_location,
+            }),
+          });
+          const data = await response.json();
+          console.log(data, "is this the data?");
+        }
+
+        revalidatePath("/");
+      }
     },
   },
 };
