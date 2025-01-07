@@ -29,10 +29,17 @@ function createManifest(
 
   const manifest = `id:${dataID};request-id:${xRequestId};ts:${ts};`;
 
+  console.log(manifest, "manifest");
+
   const hmac = createHmac("sha256", secretKey);
+
   hmac.update(manifest);
 
   const sha = hmac.digest("hex");
+
+  console.log(sha, "digested hmac");
+
+  console.log(hash, "this is the hash, check if they are the same");
 
   if (sha === hash) {
     console.log(
@@ -40,6 +47,7 @@ function createManifest(
     );
     return true;
   } else {
+    console.log("we got to the false state");
     false;
   }
 }

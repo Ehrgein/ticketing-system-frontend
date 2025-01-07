@@ -12,8 +12,8 @@ function TicketsNewPage() {
     const purchaser_id = 14;
 
     const event_id = 1;
-    const ticket_id = 25341;
-    const seat_location = "A1";
+
+    const seat_location = "A3";
     const price_per_ticket = Number(formData.get("price"));
     const quantity = Number(formData.get("quantity"));
     const event_time_id = Number(formData.get("locationID"));
@@ -21,7 +21,6 @@ function TicketsNewPage() {
     const data = {
       event_id,
       event_time_id,
-      ticket_id,
       purchaser_id,
       seat_location,
       price_per_ticket,
@@ -34,16 +33,28 @@ function TicketsNewPage() {
     redirect(url_mercadopago);
   }
 
+  async function handleRefund() {
+    "use server";
+    const refund = await api.message.refundTicket();
+
+    console.log(refund);
+  }
+
   return (
     <div className="">
       <h1 className="pb-4 font-medium text-lg">
         Metallica - River Plate 25/02
       </h1>
       <p></p>
+      <form action={handleRefund}>
+        <button type="submit" className="py-2 px-6 bg-green-700">
+          REFUND ME NOW
+        </button>
+      </form>
 
       <form action={buyTicketaction} className="grid gap- space-y-4">
         <label>Precio: $100</label>
-        <input type="hidden" name="price" value={100} />
+        <input type="hidden" name="price" value={250} />
         <label>Ubicacion</label>
         <select
           name="locationID"

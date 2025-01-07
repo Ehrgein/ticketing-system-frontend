@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-
-import api from "@/api";
+import { mercadopago } from "@/api";
+import { Preference } from "mercadopago";
 
 // Queremos que esta página sea estática, nos encargaremos de revalidar los datos cuando agreguemos un nuevo mensaje
 export const dynamic = "force-static";
@@ -11,10 +11,24 @@ export default async function HomePage() {
 
     const message = formData.get("text") as string;
 
-    // This line creates a new "preference" (a request to make a payment for a ticket) in the MercadoPago API
-    // const url = await api.message.createPaymentRequest(message);
+    const preference = await new Preference(mercadopago).create({
+      body: {
+        items: [
+          {
+            id: "message",
+            unit_price: 200,
+            quantity: 1,
+            title: "Entrada Metallicaaa",
+          },
+        ],
+        metadata: {
+          message,
+        },
+      },
+    });
 
-    // redirect(url);
+    // Redirect the user to the payment URL
+    redirect(preference.init_point!);
   }
 
   return (

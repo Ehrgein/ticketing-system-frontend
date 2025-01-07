@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { revalidatePath } from "next/cache";
 import createManifest from "./app/helpers/createManifest";
-import { MercadoPagoConfig, Preference } from "mercadopago";
+import { MercadoPagoConfig, Preference, PaymentRefund } from "mercadopago";
 import { Payment } from "mercadopago";
 
 interface Message {
@@ -32,7 +32,6 @@ const api = {
     async createPaymentRequest({
       event_time_id,
       event_id,
-      ticket_id,
       purchaser_id,
       price_per_ticket,
       seat_location,
@@ -40,7 +39,6 @@ const api = {
     }: {
       event_time_id: number;
       event_id: number;
-      ticket_id: number;
       purchaser_id: number;
       price_per_ticket: number;
       seat_location: string;
@@ -53,7 +51,7 @@ const api = {
           items: [
             {
               id: "message",
-              unit_price: price_per_ticket,
+              unit_price: 100,
               quantity: quantity,
               title: "Entrada Metallica",
             },
@@ -61,7 +59,6 @@ const api = {
           metadata: {
             event_time_id,
             event_id,
-            ticket_id,
             purchaser_id,
             price_per_ticket,
             seat_location,
@@ -83,34 +80,49 @@ const api = {
 
       // If approved, we need to validate it with the createManifest helper.
       if (payment.status === "approved") {
+        console.log(payment, "payment object");
         // if validated, we can upload anything we want to our database.
         const validated = createManifest(id, xSignature, xRequestId);
 
-        console.log(payment, "payment object");
-
         if (validated) {
+          console.log("it has been validated");
           const response = await fetch("http://localhost:4000/api/tickets", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              // price: payment.metadata.price,
-              // quantity: payment.metadata.quantity,
               event_time_id: payment.metadata.event_time_id,
               event_id: payment.metadata.event_id,
               ticket_id: payment.metadata.ticket_id,
-              purchaser_id: payment.metadata.purchaser_id,
+              location: "River Plate",
+              quantity: payment.metadata.quantity,
               price_per_ticket: payment.metadata.price_per_ticket,
               seat_location: payment.metadata.seat_location,
+              purchaser_id: payment.metadata.purchaser_id,
+              payer_email: payment.payer?.email,
+              payer_firstName: "Juan",
+              payer_lastName: "Perez",
+              payer_id: payment.payer?.id,
+              identification_num: payment.payer?.identification?.number,
+              identification_type: payment.payer?.identification?.type,
             }),
           });
-          const data = await response.json();
-          console.log(data, "is this the data?");
         }
 
         revalidatePath("/");
       }
+    },
+
+    async refundTicket() {
+      const paymentRefund = new PaymentRefund(mercadopago);
+
+      paymentRefund.create({
+        payment_id: "12345678901",
+        body: {
+          amount: 5,
+        },
+      });
     },
   },
 };
