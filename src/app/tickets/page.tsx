@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
-import React from "react";
+import React, { use } from "react";
 import api from "@/api";
+import { createClient } from "../utils/supabase/server";
+import { useGetUserData } from "../helpers/useGetUserData";
 
-function TicketsNewPage() {
+async function TicketsNewPage() {
   const availableSeats = ["A1", "A2", "A3", "A4", "A5"];
+
+  const { data } = await useGetUserData();
 
   async function buyTicketaction(formData: FormData) {
     "use server";
@@ -41,54 +45,60 @@ function TicketsNewPage() {
   }
 
   return (
-    <div className="">
-      <h1 className="pb-4 font-medium text-lg">
-        Metallica - River Plate 25/02
-      </h1>
-      <p></p>
-      <form action={handleRefund}>
-        <button type="submit" className="py-2 px-6 bg-green-700">
-          REFUND ME NOW
-        </button>
-      </form>
+    <div>
+      {data.user?.aud ? (
+        <div className="">
+          <h1 className="pb-4 font-medium text-lg">
+            Metallica - River Plate 25/02
+          </h1>
+          <p></p>
+          <form action={handleRefund}>
+            <button type="submit" className="py-2 px-6 bg-green-700">
+              REFUND ME NOW
+            </button>
+          </form>
 
-      <form action={buyTicketaction} className="grid gap- space-y-4">
-        <label>Precio: $100</label>
-        <input type="hidden" name="price" value={250} />
-        <label>Ubicacion</label>
-        <select
-          name="locationID"
-          defaultValue={14}
-          className="text-black p-2 rounded-none"
-        >
-          <option value={14}>01/05/2025 - 14:00hs - Campo</option>
-          <option value={15}>01/05/2026 - 17:00hs - Campo</option>
-          <option value={16}>01/05/2027 - 23:00hs - Campo</option>
-        </select>
+          <form action={buyTicketaction} className="grid gap- space-y-4">
+            <label>Precio: $100</label>
+            <input type="hidden" name="price" value={250} />
+            <label>Ubicacion</label>
+            <select
+              name="locationID"
+              defaultValue={14}
+              className="text-black p-2 rounded-none"
+            >
+              <option value={14}>01/05/2025 - 14:00hs - Campo</option>
+              <option value={15}>01/05/2026 - 17:00hs - Campo</option>
+              <option value={16}>01/05/2027 - 23:00hs - Campo</option>
+            </select>
 
-        <label>Available Seats:</label>
-        <select className="text-black p-2" name="seat_location">
-          {availableSeats.map((seat) => (
-            <option key={seat} value={seat}>
-              {seat}
-            </option>
-          ))}
-        </select>
+            <label>Available Seats:</label>
+            <select className="text-black p-2" name="seat_location">
+              {availableSeats.map((seat) => (
+                <option key={seat} value={seat}>
+                  {seat}
+                </option>
+              ))}
+            </select>
 
-        <label className="">Quantity</label>
-        <input
-          className="border-2 border-blue-400 p-2 text-black"
-          type="number"
-          name="quantity"
-          defaultValue={1}
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:text-black hover:bg-white transition-all duration-500 ease-in-out"
-        >
-          Buy Ticket
-        </button>
-      </form>
+            <label className="">Quantity</label>
+            <input
+              className="border-2 border-blue-400 p-2 text-black"
+              type="number"
+              name="quantity"
+              defaultValue={1}
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:text-black hover:bg-white transition-all duration-500 ease-in-out"
+            >
+              Buy Ticket
+            </button>
+          </form>
+        </div>
+      ) : (
+        <p>You need to be logged in to buy tickets. </p>
+      )}
     </div>
   );
 }
