@@ -1,5 +1,15 @@
 "use client";
 import React from "react";
+import RenderSelectedDates from "../components/ui/RenderSelectedDates";
+
+type EventInfo = {
+  event_name: String;
+  description: String;
+  ticket_price: Number;
+  ticket_availability: Number;
+  location: String;
+  datetime: Date[];
+};
 
 function EventLabel({ children }: { children: React.ReactNode }) {
   return <label className="text-white text-lg pt-6">{children}</label>;
@@ -8,18 +18,20 @@ function EventLabel({ children }: { children: React.ReactNode }) {
 function EventCreatePage() {
   const [dateTimes, setDateTimes] = React.useState<string[]>([]);
   const [currentDateTime, setcurrentDateTime] = React.useState<string>("");
-  const [availableSeats, setAvailableSeats] = React.useState<string[]>([]);
-  const [currentSeat, setCurrentSeat] = React.useState<string>("");
 
-  const handleAddSeats = (value: string) => {
-    setCurrentSeat(currentSeat);
-  };
+  const [eventName, setEventName] = React.useState<string>("Taylor Swift Eras");
+  const [description, setDescription] = React.useState<string>(
+    "Taylor's World Tour!"
+  );
+  const [price, setPrice] = React.useState<number>(100);
+  const [availableSeats, setAvailableSeats] = React.useState<number>(300);
+  const [location, setLocation] = React.useState<string>("Helsinki Arena");
 
   const handleChange = (value: string) => {
     setcurrentDateTime(value);
   };
 
-  const addDateTimes = (e) => {
+  const addDateTimes = (e: any) => {
     e.preventDefault();
     console.log("hello!");
     if (currentDateTime) {
@@ -35,8 +47,32 @@ function EventCreatePage() {
     console.log(dateTimes);
   }, [dateTimes]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    const formData = {
+      event_name: eventName,
+      description: description,
+      price_per_ticket: price,
+
+      ticket_availability: availableSeats,
+      location: location,
+      datetime: dateTimes,
+    };
+
+    console.log(formData);
+
+    const response = await fetch("http://localhost:4000/api/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    console.log(data);
   };
 
   return (
@@ -48,36 +84,41 @@ function EventCreatePage() {
         <input
           type="string"
           name="event_name"
+          value={eventName}
+          onChange={(e) => setEventName(e.target.value)}
           className="p-2 rounded-sm"
-          defaultValue={"Taylor Swift Eras"}
         />
         <EventLabel>Description:</EventLabel>
         <input
           type="string"
           name="event_description"
           className="p-2 rounded-sm"
-          defaultValue={"Taylor's World Tour!"}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <EventLabel>Price:</EventLabel>
         <input
           type="number"
           name="ticket_price"
           className="p-2 rounded-sm"
-          defaultValue={100}
+          value={price}
+          onChange={(e) => setPrice(Number(e.target.value))}
         />
         <EventLabel>Available Tickets</EventLabel>
         <input
           type="number"
-          name="ticket_price"
+          name="ticket_seats"
           className="p-2 rounded-sm"
-          defaultValue={300}
+          onChange={(e) => setAvailableSeats(Number(e.target.value))}
+          value={availableSeats}
         />
         <EventLabel>Location:</EventLabel>
         <input
           type="string"
           name="event_location"
           className="p-2 rounded-sm"
-          defaultValue={"Helsinki Arena"}
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
         />
         <EventLabel>Date Times</EventLabel>
         <input
@@ -94,26 +135,14 @@ function EventCreatePage() {
         >
           Add Datetime!
         </button>
-        <div className="grid grid-cols-2 gap-4 pt-4">
-          {dateTimes.map((datetime) => {
-            const formattedDate = new Date(datetime).toLocaleString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            return (
-              <p
-                key={formattedDate}
-                className="py-2 px-4 rounded-sm bg-white text-black opacity-0 animate-fade-in "
-              >
-                {formattedDate}
-              </p>
-            );
-          })}
-        </div>
+        <RenderSelectedDates dateTimes={dateTimes} />
+        <button
+          type="submit"
+          onClick={handleSubmit}
+          className="text-black bg-white px-4 py-2 rounded-sm "
+        >
+          Submit!@
+        </button>
       </form>
     </div>
   );

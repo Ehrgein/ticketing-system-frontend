@@ -35,3 +35,12 @@ export async function handleRefund() {
 
   console.log(refund);
 }
+
+export async function createEvent(data: {
+  event_name: string;
+  description: string;
+  location: string;
+  datetime: string[];
+  price_per_ticket: number;
+  availableSeats: string[];
+}) {}
