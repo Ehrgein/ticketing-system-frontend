@@ -3,15 +3,18 @@ import React from "react";
 import RenderSelectedDates from "./RenderSelectedDates";
 import { Input } from "@/components/ui/input";
 import { InputWithFocus } from "@/components/ui/inputWithFocus";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
 
-type EventInfo = {
-  event_name: String;
-  description: String;
-  ticket_price: Number;
-  ticket_availability: Number;
-  location: String;
-  datetime: Date[];
-};
+// type EventInfo = {
+//   event_name: String;
+//   description: String;
+//   ticket_price: Number;
+//   ticket_availability: Number;
+//   location: String;
+//   datetime: Date[];
+// };
 
 function EventLabel({
   children,
@@ -27,13 +30,22 @@ function AddEvent() {
   const [dateTimes, setDateTimes] = React.useState<string[]>([]);
   const [currentDateTime, setcurrentDateTime] = React.useState<string>("");
 
-  const [eventName, setEventName] = React.useState<string>("Taylor Swift Eras");
-  const [description, setDescription] = React.useState<string>(
-    "Taylor's World Tour!"
-  );
-  const [price, setPrice] = React.useState<number>(100);
-  const [availableSeats, setAvailableSeats] = React.useState<number>(300);
-  const [location, setLocation] = React.useState<string>("Helsinki Arena");
+  const [eventName, setEventName] = React.useState<string>("");
+  const [description, setDescription] = React.useState<string>("");
+  const [price, setPrice] = React.useState<number>(1);
+  const [availableSeats, setAvailableSeats] = React.useState<number>(1);
+  const [location, setLocation] = React.useState<string>("");
+
+  const EventInfo = z.object({
+    event_name: z
+      .string()
+      .min(3, { message: "Event must be longer then 3 caracters" }),
+    description: z.string(),
+    ticket_price: z.number(),
+    ticket_availability: z.number(),
+    location: z.string(),
+    datetime: z.string().datetime(),
+  });
 
   const handleChange = (value: string) => {
     setcurrentDateTime(value);
