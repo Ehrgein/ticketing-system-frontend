@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import RenderSelectedDates from "../components/ui/RenderSelectedDates";
+import RenderSelectedDates from "./RenderSelectedDates";
 
 type EventInfo = {
   event_name: String;
@@ -15,7 +15,7 @@ function EventLabel({ children }: { children: React.ReactNode }) {
   return <label className="text-white text-lg pt-6">{children}</label>;
 }
 
-function EventCreatePage() {
+function AddEvent() {
   const [dateTimes, setDateTimes] = React.useState<string[]>([]);
   const [currentDateTime, setcurrentDateTime] = React.useState<string>("");
 
@@ -33,19 +33,14 @@ function EventCreatePage() {
 
   const addDateTimes = (e: any) => {
     e.preventDefault();
-    console.log("hello!");
+
     if (currentDateTime) {
       const formattedTime = new Date(currentDateTime).toISOString();
 
       setDateTimes([...dateTimes, formattedTime]);
       setcurrentDateTime("");
     }
-    console.log(dateTimes);
   };
-
-  React.useEffect(() => {
-    console.log(dateTimes);
-  }, [dateTimes]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -60,8 +55,6 @@ function EventCreatePage() {
       datetime: dateTimes,
     };
 
-    console.log(formData);
-
     const response = await fetch("http://localhost:4000/api/events", {
       method: "POST",
       headers: {
@@ -71,15 +64,13 @@ function EventCreatePage() {
     });
 
     const data = await response.json();
-
-    console.log(data);
   };
 
   return (
-    <div className="pt-40 pb-40">
+    <div className="pt-20 pb-20 bg-black flex-grow items-center justify-center flex flex-col">
       <h3 className="text-2xl">Create your event here.</h3>
 
-      <form className="text-black pt-10 flex flex-col gap-2">
+      <form className="text-black pt-10 w-[600px] flex flex-col gap-2">
         <EventLabel>Event name:</EventLabel>
         <input
           type="string"
@@ -148,4 +139,4 @@ function EventCreatePage() {
   );
 }
 
-export default EventCreatePage;
+export default AddEvent;

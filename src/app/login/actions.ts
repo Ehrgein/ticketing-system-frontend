@@ -51,6 +51,7 @@ export async function signOut() {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signOut();
+  console.log(error);
 
-  console.log("user has been logged out");
+  redirect("/");
 }

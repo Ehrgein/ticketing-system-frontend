@@ -1,7 +1,17 @@
 import { sign } from "crypto";
 import { login, signup, signOut } from "./actions";
+import { useGetUserData } from "../helpers/useGetUserData";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { data, error } = await useGetUserData();
+
+  console.log(data);
+
+  // if (data.user?.aud) {
+  //   redirect("/dashboard/create-event");
+  // }
+
   return (
     <>
       <form className="flex flex-col gap-4">
