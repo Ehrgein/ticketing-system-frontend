@@ -6,11 +6,9 @@ import { redirect } from "next/navigation";
 export default async function LoginPage() {
   const { data, error } = await useGetUserData();
 
-  console.log(data);
-
-  // if (data.user?.aud) {
-  //   redirect("/dashboard/create-event");
-  // }
+  if (data.user?.aud) {
+    redirect("/dashboard/create-event");
+  }
 
   return (
     <>

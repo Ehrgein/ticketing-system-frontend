@@ -1,5 +1,6 @@
 import React from "react";
 import concertone from "../../../public/concertone.jpg";
+import { formatDateTime } from "../utils/date/date";
 import Image from "next/image";
 import concertwo from "../../../public/concertwo.jpg";
 import concerthree from "../../../public/concertthree.jpg";
@@ -8,14 +9,8 @@ type EventInfo = {
   event_name: string;
   description: string;
   location: string;
-  event_info: any;
+  event_info: { datetime: string }[];
 };
-
-export const formatDateTime = (datetime: any) =>
-  new Date(datetime).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
 async function EventsList() {
   const response = await fetch("http://localhost:4000/api/events");

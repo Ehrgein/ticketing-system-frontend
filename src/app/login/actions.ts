@@ -22,7 +22,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/dashboard/create-event");
 }
 
 export async function signup(formData: FormData) {
